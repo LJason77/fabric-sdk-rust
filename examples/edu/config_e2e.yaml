@@ -1,0 +1,687 @@
+#
+# Schema version of the content. Used by the SDK to apply the corresponding parsing rules.
+#
+version: 1.0.0
+
+#
+# The client section used by GO SDK.
+#
+client:
+
+  # Which organization does this application instance belong to? The value must be the name of an org
+  # defined under "organizations"
+  organization: Org1
+
+  logging:
+    level: info
+
+  # Global configuration for peer, event service and orderer timeouts
+  # if this this section is omitted, then default values will be used (same values as below)
+#  peer:
+#    timeout:
+#      connection: 10s
+#      response: 180s
+#      discovery:
+#        # Expiry period for discovery service greylist filter
+#        # The channel client will greylist peers that are found to be offline
+#        # to prevent re-selecting them in subsequent retries.
+#        # This interval will define how long a peer is greylisted
+#        greylistExpiry: 10s
+#  eventService:
+    # the below timeouts are commented out to use the default values that are found in
+    # "pkg/fab/endpointconfig.go"
+    # the client is free to override the default values by uncommenting and resetting
+    # the values as they see fit in their config file
+#    timeout:
+#      registrationResponse: 15s
+#  orderer:
+#    timeout:
+#      connection: 15s
+#      response: 15s
+#  global:
+#    timeout:
+#      query: 180s
+#      execute: 180s
+#      resmgmt: 180s
+#    cache:
+#      connectionIdle: 30s
+#      eventServiceIdle: 2m
+#      channelConfig: 30m
+#      channelMembership: 30s
+#      discovery: 10s
+#      selection: 10m
+
+  # Root of the MSP directories with keys and certs.
+  cryptoconfig:
+    path: ../deploy/crypto-config
+
+  # Some SDKs support pluggable KV stores, the properties under "credentialStore"
+  # are implementation specific
+  credentialStore:
+    # [Optional]. Used by user store. Not needed if all credentials are embedded in configuration
+    # and enrollments are performed elswhere.
+    path: "/tmp/state-store"
+
+    # [Optional]. Specific to the CryptoSuite implementation used by GO SDK. Software-based implementations
+    # requiring a key store. PKCS#11 based implementations does not.
+    cryptoStore:
+      # Specific to the underlying KeyValueStore that backs the crypto key store.
+      path: /tmp/msp
+
+  # [Optional] BCCSP config for the client. Used by GO SDK.
+  BCCSP:
+    security:
+     enabled: true
+     default:
+      provider: "SW"
+     hashAlgorithm: "SHA2"
+     softVerify: true
+     level: 256
+
+#  tlsCerts:
+#    # [Optional]. Use system certificate pool when connecting to peers, orderers (for negotiating TLS) Default: false
+#    systemCertPool: true
+#
+#    # [Optional]. Client key and cert for TLS handshake with peers and orderers
+#    client:
+#      key:
+#        path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.key
+#      cert:
+#        path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.crt
+
+#
+# [Optional]. But most apps would have this section so that channel objects can be constructed
+# based on the content below. If an app is creating channels, then it likely will not need this
+# section.
+#
+channels:
+
+  # Default channel is used if channel configuration is missing or if defined channel configuration is missing info
+  # If channel doesn't define peers then peers from default channel will be used
+  # If channel doesn't define orderes then orderes from default channel will be used
+  # If channel doesn't define policies then policies from default channel will be used.
+  # Also, if channel defines policies and some policy info is missing than that missing info will be filled from default channel.
+  channelname:
+
+    orderers:
+      - orderer.chain.edu
+      - orderer2.chain.edu
+      - orderer3.chain.edu
+      - orderer4.chain.edu
+      - orderer5.chain.edu
+
+    # Optional. list of peers from participating orgs
+    peers:
+      node1.organization1.chain.edu:
+        # [Optional]. will this peer be sent transaction proposals for endorsement? The peer must
+        # have the chaincode installed. The app can also use this property to decide which peers
+        # to send the chaincode install request. Default: true
+        endorsingPeer: true
+
+        # [Optional]. will this peer be sent query proposals? The peer must have the chaincode
+        # installed. The app can also use this property to decide which peers to send the
+        # chaincode install request. Default: true
+        chaincodeQuery: true
+
+        # [Optional]. will this peer be sent query proposals that do not require chaincodes, like
+        # queryBlock(), queryTransaction(), etc. Default: true
+        ledgerQuery: true
+
+        # [Optional]. will this peer be the target of the SDK's listener registration? All peers can
+        # produce events but the app typically only needs to connect to one to listen to events.
+        # Default: true
+        eventSource: true
+
+      node2.organization1.chain.edu:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      node1.organization2.chain.edu:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      node2.organization2.chain.edu:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      node1.organization3.chain.edu:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+      node2.organization3.chain.edu:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+    # [Optional]. The application can use these options to perform channel operations like retrieving channel
+    # config etc.
+    policies:
+      #[Optional] options for retrieving channel configuration blocks
+      queryChannelConfig:
+        #[Optional] min number of success responses (from targets/peers)
+        minResponses: 1
+        #[Optional] channel config will be retrieved for these number of random targets
+        maxTargets: 1
+        #[Optional] retry options for query config block
+        retryOpts:
+          #[Optional] number of retry attempts
+          attempts: 5
+          #[Optional] the back off interval for the first retry attempt
+          initialBackoff: 500ms
+          #[Optional] the maximum back off interval for any retry attempt
+          maxBackoff: 5s
+          #[Optional] he factor by which the initial back off period is exponentially incremented
+          backoffFactor: 2.0
+      #[Optional] options for retrieving discovery info
+      discovery:
+        #[Optional] discovery info will be retrieved for these number of random targets
+        maxTargets: 2
+        #[Optional] retry options for retrieving discovery info
+        retryOpts:
+          #[Optional] number of retry attempts
+          attempts: 4
+          #[Optional] the back off interval for the first retry attempt
+          initialBackoff: 500ms
+          #[Optional] the maximum back off interval for any retry attempt
+          maxBackoff: 5s
+          #[Optional] he factor by which the initial back off period is exponentially incremented
+          backoffFactor: 2.0
+
+      #[Optional] options for the event service
+      eventService:
+        # [Optional] resolverStrategy specifies the peer resolver strategy to use when connecting to a peer
+        # Possible values: [PreferOrg (default), MinBlockHeight, Balanced]
+        #
+        # PreferOrg:
+        #   Determines which peers are suitable based on block height lag threshold, although will prefer the peers in the
+        #   current org (as long as their block height is above a configured threshold). If none of the peers from the current org
+        #   are suitable then a peer from another org is chosen.
+        # MinBlockHeight:
+        #   Chooses the best peer according to a block height lag threshold. The maximum block height of all peers is
+        #   determined and the peers whose block heights are under the maximum height but above a provided "lag" threshold are load
+        #   balanced. The other peers are not considered.
+        # Balanced:
+        #   Chooses peers using the configured balancer.
+        resolverStrategy: PreferOrg
+
+        # [Optional] balancer is the balancer to use when choosing a peer to connect to
+        # Possible values: [Random (default), RoundRobin]
+        balancer: Random
+
+        # [Optional] blockHeightLagThreshold sets the block height lag threshold. This value is used for choosing a peer
+        # to connect to. If a peer is lagging behind the most up-to-date peer by more than the given number of
+        # blocks then it will be excluded from selection.
+        # Note that this parameter is applicable only when minBlockHeightResolverMode is set to ResolveByThreshold.
+        # Default: 5
+        blockHeightLagThreshold: 5
+
+        # [Optional] reconnectBlockHeightLagThreshold - the event client will disconnect from the peer if the peer's
+        # block height falls behind the specified number of blocks and will reconnect to a better performing peer.
+        # Note that this parameter is only applicable if peerMonitor is set to Enabled (default).
+        # Default: 10
+        # NOTES:
+        #   - Setting this value too low may cause the event client to disconnect/reconnect too frequently, thereby
+        #     affecting performance.
+        reconnectBlockHeightLagThreshold: 8
+
+        # [Optional] peerMonitorPeriod is the period in which the connected peer is monitored to see if
+        # the event client should disconnect from it and reconnect to another peer.
+        # Default: 0 (disabled) for Balanced resolverStrategy; 5s for PreferOrg and MinBlockHeight strategy
+        peerMonitorPeriod: 6s
+
+#
+# list of participating organizations in this network
+#
+organizations:
+  Org1:
+    mspid: Organization1MSP
+
+    # This org's MSP store (absolute path or relative to client.cryptoconfig)
+    cryptoPath:  peerOrganizations/organization1.chain.edu/users/Admin@organization1.chain.edu/msp
+
+    peers:
+      - node1.organization1.chain.edu
+      - node2.organization1.chain.edu
+
+    # [Optional]. Certificate Authorities issue certificates for identification purposes in a Fabric based
+    # network. Typically certificates provisioning is done in a separate process outside of the
+    # runtime network. Fabric-CA is a special certificate authority that provides a REST APIs for
+    # dynamic certificate management (enroll, revoke, re-enroll). The following section is only for
+    # Fabric-CA servers.
+#    certificateAuthorities:
+#      - ca.organization1.chain.edu
+
+  # the profile will contain public information about organizations other than the one it belongs to.
+  # These are necessary information to make transaction lifecycles work, including MSP IDs and
+  # peers with a public URL to send transaction proposals. The file will not contain private
+  # information reserved for members of the organization, such as admin key and certificate,
+  # fabric-ca registrar enroll ID and secret, etc.
+  Org2:
+    mspid: Organization2MSP
+
+    # This org's MSP store (absolute path or relative to client.cryptoconfig)
+    cryptoPath:  peerOrganizations/organization2.chain.edu/users/Admin@organization2.chain.edu/msp
+
+    peers:
+      - node1.organization2.chain.edu
+      - node2.organization2.chain.edu
+
+#    certificateAuthorities:
+#      - ca.organization2.chain.edu
+
+  Org3:
+    mspid: Organization3MSP
+
+    # This org's MSP store (absolute path or relative to client.cryptoconfig)
+    cryptoPath: peerOrganizations/organization3.chain.edu/users/Admin@organization3.chain.edu/msp
+
+    peers:
+      - node1.organization3.chain.edu
+      - node2.organization3.chain.edu
+
+  # Orderer Org name
+  ordererorg:
+      # Membership Service Provider ID for this organization
+      mspID: OrdererMSP
+
+      # Needed to load users crypto keys and certs for this org (absolute path or relative to global crypto path, DEV mode)
+      cryptoPath: ordererOrganizations/chain.edu/users/Admin@chain.edu/msp
+
+
+#
+# List of orderers to send transaction and channel create/update requests to. For the time
+# being only one orderer is needed. If more than one is defined, which one get used by the
+# SDK is implementation specific. Consult each SDK's documentation for its handling of orderers.
+#
+orderers:
+  orderer.chain.edu:
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:7050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/ordererOrganizations/chain.edu/tlsca/tlsca.chain.edu-cert.pem
+
+  orderer2.chain.edu:
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:8050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer2.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/ordererOrganizations/chain.edu/tlsca/tlsca.chain.edu-cert.pem
+
+  orderer3.chain.edu:
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:9050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer3.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/ordererOrganizations/chain.edu/tlsca/tlsca.chain.edu-cert.pem
+
+  orderer4.chain.edu:
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:10050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer4.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/ordererOrganizations/chain.edu/tlsca/tlsca.chain.edu-cert.pem
+
+  orderer5.chain.edu:
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:11050
+
+    # these are standard properties defined by the gRPC library
+    # they will be passed in as-is to gRPC client constructor
+    grpcOptions:
+      ssl-target-name-override: orderer5.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/ordererOrganizations/chain.edu/tlsca/tlsca.chain.edu-cert.pem
+
+#
+# List of peers to send various requests to, including endorsement, query
+# and event listener registration.
+#
+peers:
+  node1.organization1.chain.edu:
+    # this URL is used to send endorsement and query requests
+    # [Optional] Default: Infer from hostname
+    url: 127.0.0.1:7051
+
+    grpcOptions:
+      ssl-target-name-override: node1.organization1.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/peerOrganizations/organization1.chain.edu/tlsca/tlsca.organization1.chain.edu-cert.pem
+
+  node2.organization1.chain.edu:
+    url: 127.0.0.1:8051
+
+    grpcOptions:
+      ssl-target-name-override: node2.organization1.chain.edu
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/peerOrganizations/organization1.chain.edu/tlsca/tlsca.organization1.chain.edu-cert.pem
+
+
+  node1.organization2.chain.edu:
+    # this URL is used to send endorsement and query requests
+    url: 127.0.0.1:9051
+
+    grpcOptions:
+      ssl-target-name-override: node1.organization2.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/peerOrganizations/organization2.chain.edu/tlsca/tlsca.organization2.chain.edu-cert.pem
+
+  node2.organization2.chain.edu:
+    url: 127.0.0.1:10051
+
+    grpcOptions:
+      ssl-target-name-override: node2.organization2.chain.edu
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+
+    tlsCACerts:
+      # Certificate location absolute path
+      path: ../deploy/crypto-config/peerOrganizations/organization2.chain.edu/tlsca/tlsca.organization2.chain.edu-cert.pem
+
+
+  node1.organization3.chain.edu:
+    url: 127.0.0.1:11051
+    grpcOptions:
+      ssl-target-name-override: node1.organization3.chain.edu
+      # These parameters should be set in coordination with the keepalive policy on the server,
+      # as incompatible settings can result in closing of connection.
+      # When duration of the 'keep-alive-time' is set to 0 or less the keep alive client parameters are disabled
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      # allow-insecure will be taken into consideration if address has no protocol defined, if true then grpc or else grpcs
+      allow-insecure: false
+
+    tlsCACerts:
+      path: ../deploy/crypto-config/peerOrganizations/organization3.chain.edu/tlsca/tlsca.organization3.chain.edu-cert.pem
+
+  node2.organization3.chain.edu:
+    url: 127.0.0.1:12051
+
+    grpcOptions:
+      ssl-target-name-override: node2.organization3.chain.edu
+      keep-alive-time: 0s
+      keep-alive-timeout: 20s
+      keep-alive-permit: false
+      fail-fast: false
+      allow-insecure: false
+
+    tlsCACerts:
+      path: ../deploy/crypto-config/peerOrganizations/organization3.chain.edu/tlsca/tlsca.organization3.chain.edu-cert.pem
+
+
+#
+# Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows
+# certificate management to be done via REST APIs. Application may choose to use a standard
+# Certificate Authority instead of Fabric-CA, in which case this section would not be specified.
+#
+#certificateAuthorities:
+#  ca.organization1.chain.edu:
+#    # [Optional] Default: Infer from hostname
+#    url: https://ca.organization1.chain.edu:7054
+#    tlsCACerts:
+#      # Comma-Separated list of paths
+#      path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/organization1.chain.edu/tlsca/tlsca.organization1.chain.edu-cert.pem
+#      # Client key and cert for SSL handshake with Fabric CA
+#      client:
+#        key:
+#          path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.key
+#        cert:
+#          path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.crt
+#
+#    # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+#    # needed to enroll and invoke new users.
+#    registrar:
+#      enrollId: admin
+#      enrollSecret: adminpw
+#    # [Optional] The optional name of the CA.
+#    caName: ca.organization1.chain.edu
+#  ca.organization2.chain.edu:
+#    url: https://ca.organization2.chain.edu:8054
+#    tlsCACerts:
+#      # Comma-Separated list of paths
+#      path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/organization2.chain.edu/tlsca/tlsca.organization2.chain.edu-cert.pem
+#      # Client key and cert for SSL handshake with Fabric CA
+#      client:
+#        key:
+#          path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.key
+#        cert:
+#          path: ${FABRIC_SDK_GO_PROJECT_PATH}/${CRYPTOCONFIG_FIXTURES_PATH}/peerOrganizations/tls.chain.edu/users/User1@tls.chain.edu/tls/client.crt
+#
+#     # Fabric-CA supports dynamic user enrollment via REST APIs. A "root" user, a.k.a registrar, is
+#     # needed to enroll and invoke new users.
+#    registrar:
+#      enrollId: admin
+#      enrollSecret: adminpw
+#    # [Optional] The optional name of the CA.
+#    caName: ca.organization2.chain.edu
+
+# EntityMatchers enable substitution of network hostnames with static configurations
+ # so that properties can be mapped. Regex can be used for this purpose
+# UrlSubstitutionExp can be empty which means the same network hostname will be used
+# UrlSubstitutionExp can be given same as mapped peer url, so that mapped peer url can be used
+# UrlSubstitutionExp can have golang regex matchers like ${1}.local.example.${2}:${3} for pattern
+ # like node1.organization1.chain.edu:1234 which converts node1.organization1.chain.edu to node1.organization1.local.chain.edu:1234
+# sslTargetOverrideUrlSubstitutionExp follow in the same lines as
+ # SubstitutionExp for the fields gprcOptions.ssl-target-name-override respectively
+# In any case mappedHost's config will be used, so mapped host cannot be empty, if entityMatchers are used
+#entityMatchers:
+entityMatchers:
+  peer:
+#    - pattern: (\w+).organization1.chain.edu:(\d+)
+#      urlSubstitutionExp: ${1}.organization1.chain.edu:${2}
+#      sslTargetOverrideUrlSubstitutionExp: ${1}.organization1.chain.edu
+#      mappedHost: node1.organization1.chain.edu
+#
+#    - pattern: (\w+).organization2.chain.edu:(\d+)
+#      urlSubstitutionExp: ${1}.organization2.chain.edu:${2}
+#      sslTargetOverrideUrlSubstitutionExp: ${1}.organization2.chain.edu
+#      mappedHost: node1.organization2.chain.edu
+
+    - pattern: (\w+).organization1.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:7051
+      sslTargetOverrideUrlSubstitutionExp: node1.organization1.chain.edu
+      mappedHost: node1.organization1.chain.edu
+
+    - pattern: (\w+).organization1.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:8051
+      sslTargetOverrideUrlSubstitutionExp: node2.organization1.chain.edu
+      mappedHost: node2.organization1.chain.edu
+
+    - pattern: (\w+).organization2.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:9051
+      sslTargetOverrideUrlSubstitutionExp: node1.organization2.chain.edu
+      mappedHost: node1.organization2.chain.edu
+
+    - pattern: (\w+).organization2.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:10051
+      sslTargetOverrideUrlSubstitutionExp: node2.organization2.chain.edu
+      mappedHost: node2.organization2.chain.edu
+
+    - pattern: (\w+).organization3.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:11051
+      sslTargetOverrideUrlSubstitutionExp: node1.organization3.chain.edu
+      mappedHost: node1.organization3.chain.edu
+
+    - pattern: (\w+).organization3.chain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:12051
+      sslTargetOverrideUrlSubstitutionExp: node2.organization3.chain.edu
+      mappedHost: node2.organization3.chain.edu
+#
+#    - pattern: (\w+).organization2.example.(\w+)
+#      urlSubstitutionExp: node1.organization2.chain.edu:8051
+#      sslTargetOverrideUrlSubstitutionExp: node1.organization2.chain.edu
+#      mappedHost: node1.organization2.chain.edu
+#
+#    - pattern: (\w+).example1.(\w+):(\d+)
+#      urlSubstitutionExp: ${1}.organization1.example.${2}:${3}
+#      sslTargetOverrideUrlSubstitutionExp: ${1}.organization1.example.${2}
+#      mappedHost: node1.organization1.chain.edu
+#
+#    - pattern: (\w+).organization1.example.(\w+):(\d+)
+#      urlSubstitutionExp: node1.organization1.chain.edu:7051
+#      sslTargetOverrideUrlSubstitutionExp: node1.organization1.chain.edu
+#      mappedHost: node1.organization1.chain.edu
+#
+  orderer:
+    - pattern: (\w+).accurchain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:7050
+      sslTargetOverrideUrlSubstitutionExp: orderer.chain.edu
+      mappedHost: orderer.chain.edu
+
+    - pattern: (\w+).accurchain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:8050
+      sslTargetOverrideUrlSubstitutionExp: orderer2.chain.edu
+      mappedHost: orderer2.chain.edu
+
+    - pattern: (\w+).accurchain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:9050
+      sslTargetOverrideUrlSubstitutionExp: orderer3.chain.edu
+      mappedHost: orderer3.chain.edu
+
+    - pattern: (\w+).accurchain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:10050
+      sslTargetOverrideUrlSubstitutionExp: orderer4.chain.edu
+      mappedHost: orderer4.chain.edu
+
+    - pattern: (\w+).accurchain.(\w+)
+      urlSubstitutionExp: 127.0.0.1:11050
+      sslTargetOverrideUrlSubstitutionExp: orderer5.chain.edu
+      mappedHost: orderer5.chain.edu
+#
+#    - pattern: (\w+).example2.(\w+)
+#      urlSubstitutionExp: localhost:7050
+#      sslTargetOverrideUrlSubstitutionExp: localhost
+#      mappedHost: orderer.chain.edu
+#
+#    - pattern: (\w+).example3.(\w+)
+#      urlSubstitutionExp:
+#      sslTargetOverrideUrlSubstitutionExp:
+#      mappedHost: orderer.chain.edu
+#
+#    - pattern: (\w+).example4.(\w+):(\d+)
+#      urlSubstitutionExp: ${1}.example.${2}:${3}
+#      sslTargetOverrideUrlSubstitutionExp: ${1}.example.${2}
+#      mappedHost: orderer.chain.edu
+#
+#  certificateAuthority:
+#    - pattern: (\w+).organization1.example.(\w+)
+#      urlSubstitutionExp:
+#      mappedHost: ca.organization1.chain.edu
+#
+#    - pattern: (\w+).organization2.example.(\w+)
+#      urlSubstitutionExp:
+#      mappedHost: ca.organization2.chain.edu
