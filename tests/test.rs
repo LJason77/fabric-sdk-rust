@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use fabric::core::config::ConfigBackend;
+    use fabric::core::config::Config;
 
     #[test]
     fn it_works() {
-        ConfigBackend::from_file("aaa");
+        Config::from_file("aaa");
     }
 }

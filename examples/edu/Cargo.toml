@@ -3,6 +3,16 @@ name = "edu"
 version = "0.1.0"
 edition = "2018"
 
+[profile.release]
+codegen-units = 1
+lto = "fat"
+panic = "abort"
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 fabric = { path = "../../" }
+
+[dependencies.rocket]
+git = "https://github.com/SergioBenitez/Rocket"
+version = "0.5.0-rc.1"
+features = ["json"]
