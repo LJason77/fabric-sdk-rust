@@ -116,6 +116,7 @@ pub struct Config {
 
 impl Config {
     /// 从配置文件中读取
+    #[must_use]
     pub fn from_file(path: &str) -> Config {
         match read_to_string(path) {
             Ok(yaml) => match serde_yaml::from_str::<Self>(&yaml) {
